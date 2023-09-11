@@ -1,0 +1,515 @@
+openapi: 3.0.0
+
+info:
+  version: '1.0.0'
+  title: 'Job portal api'
+  description: 'This is an assignment of fs-army advanced backend'
+  contact:
+    name: Mehedi Hasan
+    email: hmehedi203@gmail.com
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: Dev
+    url: "http://localhost:4000/api/v1"
+tags: 
+  - name: Auth
+    description: Authentication endpoints 
+  - name: Users
+    description: Users endpoints 
+  - name: Companies
+    description: Companies endpoints 
+  - name: Jobs
+    description: Jobs endpoints
+paths: 
+  "/auth/register": 
+    post: 
+      description: Create a new User
+      tags: [Auth]
+      requestBody:
+        content:
+          "application/json": 
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  
+                email:
+                  type: string
+                  format: email
+                password: 
+                  type: string
+                  format: password
+              required: [name, email, password]
+      responses:
+        "201":
+          description: Registration successful
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: "Registration successful"
+                  data:
+                    type: object
+                    properties:
+                      access_token: 
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                      links: 
+                        type: object
+                        properties:
+                          self:
+                            type: string
+                            example: "/auth/register"
+                          login:
+                            type: string
+                            example: "/auth/login"
+        "400":
+          $ref: "#/components/responses/400"
+  "/auth/login": 
+    post: 
+      description: Create a new User
+      tags: [Auth]
+      requestBody:
+        content:
+          "application/json": 
+            schema:
+              type: object
+              properties:
+                
+                email:
+                  type: string
+                  format: email
+                password: 
+                  type: string
+                  format: password
+              required: [email, password]
+      responses:
+        "200":
+          description: login successful
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  code: 
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: "login successful"
+                  data:
+                    type: object
+                    properties:
+                      access_token: 
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                      links: 
+                        type: object
+                        properties:
+                          self:
+                            type: string
+                            example: "/auth/login"
+        "400":
+          $ref: "#/components/responses/400"
+  "/companies": 
+    get:
+      tags: [Companies]
+      description: Retrieve all companies list
+      parameters: 
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortTypeParam"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/searchParam"
+      responses:
+        "200":
+          description: "Return all company lists"
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - type: object
+                          properties: 
+                            id:
+                              type: string
+                              format: uuid
+                              example: "e58ed763-928c-4155-bee9-fdbaaadc15f3"
+                            name:
+                              type: string
+                              example: "abc company"
+                            industry:
+                              type: string
+                              example: "tech"
+                            website:
+                              type: string
+                              format: url
+                        - $ref: "#/components/schemas/Timestamp"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/companies?page=2&limit=10"
+                      next:
+                        type: string
+                        format: url
+                        example: "/companies?page=3&limit=10"
+                      prev:
+                        type: string
+                        format: url
+                        example: "/companies?page=1&limit=10"
+        "400": 
+          "$ref": "#/components/responses/400"
+        "500": 
+          "$ref": "#/components/responses/500"
+    post: 
+      security:
+        - bearerAuth: []
+      tags: [Companies]
+      description: Create a new company
+      requestBody:
+        description: Provide valid data
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                industry:
+                  type: string
+                website:
+                  type: string
+                  format: url
+              required: [name, industry, website]
+      responses:
+        "201": 
+          description: Company Created succesfully
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/CompanyCreateDTO"
+        "400": 
+         $ref: "#/components/responses/400"
+        "401": 
+         $ref: "#/components/responses/401"
+        "500":
+          $ref: "#/components/responses/500"
+  "/companies/{id}":
+    get: 
+      tags: [Companies]
+      description: Get a single company details
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+        - in: query
+          name: expand
+          description: expand object
+          schema:
+            type: string
+            example: "name,industry"
+      responses:
+        "200": 
+          description: "Get single company details"
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  data: 
+                    allOf:
+                       - $ref: "#/components/schemas/Company"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: "/companies/e58ed763-928c-4155-bee9-fdbaaadc15f3"
+        "400":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    put: 
+      security:
+        - bearerAuth: []
+      tags: [Companies]
+      description: Update an existing company details
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        "200": 
+          description: Update an existing company details
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  data: 
+                    allOf:
+                      - $ref: "#/components/schemas/Company"
+                  links: 
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example:  "/companies/e58ed763-928c-4155-bee9-fdbaaadc15f3"
+        "201":
+          description: "Successfully Created"
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/CompanyCreateDTO'
+        "400":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    delete: 
+      security:
+        - bearerAuth: []
+      tags: [Companies]
+      description: Delete an existing company
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        "204":
+          description: "Company deleted successfully"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+      
+          
+components:
+  securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+  schemas:
+    Timestamp:
+        type: object
+        properties:
+          createdAt:
+            type: string
+            format: datetime
+          updatedAt:
+            type: string
+            format: datetime
+        required: [createdAt, updatedAt]
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 2
+        limit:
+          type: integer
+          format: int32
+          example: 10
+        next:
+          type: integer
+          format: int32
+          example: 3
+        prev:
+          type: integer
+          format: int32
+          example: 1
+        totalPage:
+          type: integer
+          format: int32
+          example: 5
+        totalItems:
+          type: integer
+          format: int32
+          example: 50
+      required:
+        - page
+        - limit
+        - totalPage
+        - totalItems
+    Company:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "e58ed763-928c-4155-bee9-fdbaaadc15f3"
+            
+            name:
+              type: string
+            industry:
+              type: string
+            website:
+              type: string
+              
+          required: [id, name, indusry, website]
+        - $ref: "#/components/schemas/Timestamp"
+    CompanyCreateDTO:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 201
+        message:
+          type: string
+          example: "Company created successfully"
+        data:
+          $ref: "#/components/schemas/Company"
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              example: "/companies/58ed763-928c-4155-bee9-fdbaaadc15f3"
+            
+  responses:
+    "400":
+      description: "Bad Request"
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 400
+              error:
+                type: string
+                example: "Bad Request"
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: email
+                    message:
+                      type: string
+                      example: Invalid email
+    "500":
+      description: "Internal Server Error"
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 500
+              error:
+                type: string
+                example: Internal Server Error
+              message:
+                type: string
+                example: "An unexpected error occurred"
+    "401":
+      description: Unauthorized
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 401
+              error:
+                type: string
+                example: Unauthorized
+              message:
+                type: string
+                example: You don't have the right permissions
+    "404":
+      description: Resource Not Found
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 404
+              error:
+                type: string
+                example: Not Found
+              message:
+                type: string
+                example: Requested resource not found
+      
+  parameters:
+    pageParam:
+      in: query
+      name: page
+      description: current page number
+      schema:
+        type: integer
+        format: int32
+        example: 2
+    limitParam:
+      in: query
+      name: limit
+      description: maximum items to be returned
+      schema:
+        type: integer
+        format: int32
+        example: 10
+    sortTypeParam:
+      in: query
+      name: sort_type
+      description: type of sort (asc or dsc)
+      schema:
+        type: string
+        enum: [asc, dsc]
+        example: dsc
+    sortByParam:
+      in: query
+      name: sort_by
+      description: Sort key
+      schema:
+        type: string
+        example: updatedAt
+    searchParam:
+      in: query
+      name: search
+      description: Search term
+      schema:
+        type: string
+        example: name
+    idPathParam:
+      in: path
+      name: id
+      required: true
+      description: Company ID
+      schema:
+        type: string
+        format: uuid
+        example: "e58ed763-928c-4155-bee9-fdbaaadc15f3"
