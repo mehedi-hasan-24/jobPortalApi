@@ -1,12 +1,10 @@
 const express = require("express");
-const swaggerUI = require("swagger-ui-express");
-const YAML = require("yamljs");
+const applyMiddleware = require("./middleware");
 
-const swaggerDoc = YAML.load("./swagger.yaml");
 
 const app = express();
-app.use(express.json());
-app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(swaggerDoc));
+applyMiddleware(app);
+
 
 app.get("/health", (_req, res)=>{
     res.status(200).json({
@@ -24,8 +22,6 @@ app.get("/api/v1/companies", (req, res)=>{
     res.status(200).json({
         path: req.path,
     })
-})
+});
 
-app.listen(4000, ()=>{
-    console.log("server is listening on port");
-})
+  module.exports = app;

@@ -313,10 +313,10 @@ components:
         properties:
           createdAt:
             type: string
-            format: datetime
+            format: date-time
           updatedAt:
             type: string
-            format: datetime
+            format: date-time
         required: [createdAt, updatedAt]
     Pagination:
       type: object
